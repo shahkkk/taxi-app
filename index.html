@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taryfa – Compare Uber, Bolt &amp; FREENOW fares in Warsaw</title>
+  <meta name="description" content="Compare estimated Uber, Bolt and FREENOW taxi fares in Warsaw. Detect your location, set precise pickup and drop-off points and pick the best price.">
+  <meta name="theme-color" content="#101318">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="./" aria-label="Taryfa home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">Taryfa</span>
+          <span class="brand__tag">Compare Uber, Bolt &amp; FREENOW fares across Warsaw</span>
+        </span>
+      </a>
+      <div class="chips">
+        <span class="chip chip--live"><span class="pulse" aria-hidden="true"></span>Live · Warsaw <span id="clock">--:--</span></span>
+        <span class="chip" id="demandChip">Normal demand</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section class="col col--form" aria-label="Plan your ride">
+      <div class="card">
+        <h1 class="h1">Where are you going?</h1>
+
+        <!-- Pickup -->
+        <div class="field" data-field="pickup">
+          <div class="field__head">
+            <label for="pickupInput" class="label">Pickup</label>
+            <div class="field__actions">
+              <button type="button" class="btn btn--ghost" id="locateBtn">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                <span>Use my location</span>
+              </button>
+              <button type="button" class="btn btn--ghost pin-btn" data-pin="pickup" aria-pressed="false">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                <span>Pin on map</span>
+              </button>
+            </div>
+          </div>
+          <div class="combo">
+            <span class="combo__dot combo__dot--a" aria-hidden="true"></span>
+            <input id="pickupInput" class="input" type="text" autocomplete="off" spellcheck="false"
+                   placeholder="Street and number, place or landmark"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickupList">
+            <button type="button" class="combo__clear" data-clear="pickup" aria-label="Clear pickup" hidden>
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+            <ul class="suggest" id="pickupList" role="listbox" aria-label="Pickup suggestions" hidden></ul>
+          </div>
+          <label for="pickupNote" class="sr-only">Pickup details</label>
+          <input id="pickupNote" class="input input--note" type="text" placeholder="Entrance, gate, building or floor (optional)">
+          <span class="detail" id="pickupDetail">Pick a suggestion, use your location, or pin the exact spot.</span>
+        </div>
+
+        <div class="swap-row">
+          <span class="rule" aria-hidden="true"></span>
+          <button type="button" class="btn-round" id="swapBtn" aria-label="Swap pickup and drop-off">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg>
+          </button>
+          <span class="rule" aria-hidden="true"></span>
+        </div>
+
+        <!-- Drop-off -->
+        <div class="field" data-field="dropoff">
+          <div class="field__head">
+            <label for="dropoffInput" class="label">Drop-off</label>
+            <div class="field__actions">
+              <button type="button" class="btn btn--ghost pin-btn" data-pin="dropoff" aria-pressed="false">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                <span>Pin on map</span>
+              </button>
+            </div>
+          </div>
+          <div class="combo">
+            <span class="combo__dot combo__dot--b" aria-hidden="true"></span>
+            <input id="dropoffInput" class="input" type="text" autocomplete="off" spellcheck="false"
+                   placeholder="Where to? Street and number or place"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoffList">
+            <button type="button" class="combo__clear" data-clear="dropoff" aria-label="Clear drop-off" hidden>
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+            <ul class="suggest" id="dropoffList" role="listbox" aria-label="Drop-off suggestions" hidden></ul>
+          </div>
+          <label for="dropoffNote" class="sr-only">Drop-off details</label>
+          <input id="dropoffNote" class="input input--note" type="text" placeholder="Entrance, terminal, gate (optional)">
+          <span class="detail" id="dropoffDetail">Pick a suggestion or pin the exact spot.</span>
+        </div>
+
+        <p class="status" id="status" role="status" hidden></p>
+
+        <div class="field">
+          <span class="label" id="rideTypeLabel">Ride type</span>
+          <div class="segmented" role="group" aria-labelledby="rideTypeLabel">
+            <button type="button" class="seg" data-class="standard" aria-pressed="true"><span>Standard</span><small>1–4 seats</small></button>
+            <button type="button" class="seg" data-class="comfort" aria-pressed="false"><span>Comfort</span><small>Newer cars</small></button>
+            <button type="button" class="seg" data-class="xl" aria-pressed="false"><span>XL</span><small>5–6 seats</small></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <h2 class="h2">Fares right now</h2>
+          <button type="button" class="btn btn--link" id="refreshBtn">
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+            <span>Updated <span id="updated">--:--:--</span></span>
+          </button>
+        </div>
+
+        <div class="empty" id="emptyState">Choose a pickup and a drop-off to compare Uber, Bolt and FREENOW side by side.</div>
+
+        <div id="results" hidden>
+          <div class="stats">
+            <div class="stat"><span class="stat__k">Distance</span><span class="stat__v" id="statDistance">–</span></div>
+            <div class="stat"><span class="stat__k">Travel time</span><span class="stat__v" id="statTime">–</span></div>
+            <div class="stat"><span class="stat__k">Traffic</span><span class="stat__v" id="statTraffic">–</span></div>
+          </div>
+          <div class="offers" id="offers" aria-live="polite"></div>
+          <p class="savings" id="savings"></p>
+          <p class="fine" id="routeSource"></p>
+        </div>
+      </div>
+
+      <div class="card card--dark" id="selection" hidden>
+        <div class="sel__head">
+          <div>
+            <span class="eyebrow">Your choice</span>
+            <span class="sel__title" id="selTitle"></span>
+          </div>
+          <span class="sel__price" id="selPrice"></span>
+        </div>
+        <div class="sel__route">
+          <div class="sel__stop"><span class="dot dot--a" aria-hidden="true"></span><span id="selFrom"></span></div>
+          <div class="sel__stop"><span class="dot dot--b" aria-hidden="true"></span><span id="selTo"></span></div>
+        </div>
+        <span class="sel__meta" id="selMeta"></span>
+        <div class="sel__actions">
+          <a class="btn-primary" id="selLink" href="#" target="_blank" rel="noopener">
+            <span id="selLinkText">Book</span>
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+          </a>
+          <button type="button" class="btn-outline" id="selChange">Change</button>
+        </div>
+        <span class="sel__fine">The app confirms the final fare before you book.</span>
+      </div>
+    </section>
+
+    <section class="col col--map" aria-label="Route map">
+      <div class="card card--map">
+        <div class="card__head">
+          <h2 class="h2">Route map</h2>
+          <div class="legend">
+            <span><i class="dot dot--a" aria-hidden="true"></i>Pickup</span>
+            <span><i class="dot dot--b" aria-hidden="true"></i>Drop-off</span>
+            <span><i class="line" aria-hidden="true"></i>Route</span>
+          </div>
+        </div>
+        <div class="pinbar" id="pinBar" role="status" hidden>
+          <span id="pinBarText">Click the exact spot on the map.</span>
+          <button type="button" class="btn btn--ghost" id="pinCancel">Cancel</button>
+        </div>
+        <div id="map" class="map" aria-label="Map of Warsaw"></div>
+        <p class="fine">Tip: drag the A and B markers to fine-tune the exact pickup and drop-off door.</p>
+        <div class="coords">
+          <span><strong>A</strong> <span id="coordA">–</span></span>
+          <span><strong>B</strong> <span id="coordB">–</span></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="h3">How these fares are calculated</h2>
+        <p class="body">Uber, Bolt and FREENOW don’t offer open price APIs, so Taryfa estimates each fare from a pricing model per service (base fare, per km, per minute, minimum fare), the real driving route between your two points, and live time-of-day demand – surge for app rides at rush hour and weekend nights, and the night/Sunday tariff for licensed taxis. The price shown in the app at booking is final.</p>
+        <p class="fine">Taryfa is independent and not affiliated with Uber, Bolt or FREENOW. Map data © OpenStreetMap contributors. Search by Nominatim, routing by OSRM.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <span>© <span id="year"></span> Taryfa · Estimates only, not live quotes.</span>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/places.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
